@@ -144,6 +144,11 @@ CREATE POLICY "Tracker can update device sessions"
 CREATE POLICY "Anon can read categories"
   ON app_categories FOR SELECT USING (true);
 
+-- devices: authenticated admins (web portal) can read all devices
+CREATE POLICY "Authenticated users read all devices"
+  ON devices FOR SELECT TO authenticated
+  USING (true);
+
 -- ============================================================
 -- SEED: DEFAULT APP CATEGORIES (35 apps)
 -- ============================================================

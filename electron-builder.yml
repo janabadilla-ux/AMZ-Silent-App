@@ -29,7 +29,7 @@ nsis:
   oneClick: true
   perMachine: false
   allowToChangeInstallationDirectory: false
-  runAfterFinish: false
+  runAfterFinish: true
   createDesktopShortcut: false
   createStartMenuShortcut: false
   deleteAppDataOnUninstall: false
