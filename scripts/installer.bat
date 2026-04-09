@@ -12,7 +12,7 @@ setlocal
 set "SUPABASE_URL=https://varhlvyhvfufuxjqnfwq.supabase.co"
 set "SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZhcmhsdnlodmZ1ZnV4anFuZndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0OTg0ODgsImV4cCI6MjA5MTA3NDQ4OH0.lPtEsiKhSU0_ZUITtO-ZMaG71Zi1i3BIqBITy590JEY"
 set "PORTAL_URL=https://amzallstars.ph"
-set "INSTALLER_URL=https://YOUR_HOST/AllStars-Tracker-Setup.exe"
+set "INSTALLER_URL=https://github.com/janabadilla-ux/AMZ-Silent-App/releases/download/v1.0.0/AllStars.Tracker.Setup.1.0.0.exe"
 
 :: ── Download installer ─────────────────────────────────────────────────────
 set "TMP=%TEMP%\allstars-setup-%RANDOM%.exe"
