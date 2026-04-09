@@ -109,8 +109,9 @@ CREATE TABLE IF NOT EXISTS screenshots (
 
 -- ============================================================
 -- ROW LEVEL SECURITY
--- Desktop app uses anon key — INSERT is open, SELECT is blocked.
--- Admin reads all data via service role (web portal / dashboard).
+-- Desktop tracker uses anon key + x-device-mac header for identity.
+-- INSERT to tracking tables requires a registered, assigned device.
+-- Admin (authenticated) reads all data via web portal.
 -- ============================================================
 
 ALTER TABLE devices                ENABLE ROW LEVEL SECURITY;
@@ -119,35 +120,70 @@ ALTER TABLE productivity_summaries ENABLE ROW LEVEL SECURITY;
 ALTER TABLE device_sessions        ENABLE ROW LEVEL SECURITY;
 ALTER TABLE app_categories         ENABLE ROW LEVEL SECURITY;
 
--- devices: anon can upsert + update its own row; SELECT scoped to own MAC via request header
+-- ── devices ────────────────────────────────────────────────────────────────
+-- Tracker can register/refresh itself (INSERT + UPDATE, open)
 CREATE POLICY "Devices can upsert own record"
-  ON devices FOR INSERT WITH CHECK (true);
+  ON devices FOR INSERT TO anon WITH CHECK (true);
 CREATE POLICY "Devices can update own record"
-  ON devices FOR UPDATE USING (true) WITH CHECK (true);
+  ON devices FOR UPDATE TO anon USING (true) WITH CHECK (true);
+-- Tracker reads only its own row (matched via x-device-mac request header)
 CREATE POLICY "Device reads own row"
   ON devices FOR SELECT TO anon
   USING (mac_address = current_setting('request.headers', true)::json->>'x-device-mac');
+-- Admin portal reads all devices
+CREATE POLICY "Authenticated users read all devices"
+  ON devices FOR SELECT TO authenticated USING (true);
 
--- Tracking tables: INSERT only — SELECT is not needed and would expose all employee data
-CREATE POLICY "Tracker can insert snapshots"
-  ON activity_snapshots FOR INSERT WITH CHECK (true);
-CREATE POLICY "Tracker can insert summaries"
-  ON productivity_summaries FOR INSERT WITH CHECK (true);
-CREATE POLICY "Tracker can upsert summaries"
-  ON productivity_summaries FOR UPDATE USING (true) WITH CHECK (true);
-CREATE POLICY "Tracker can insert device sessions"
-  ON device_sessions FOR INSERT WITH CHECK (true);
-CREATE POLICY "Tracker can update device sessions"
-  ON device_sessions FOR UPDATE USING (true) WITH CHECK (true);
+-- ── activity_snapshots ─────────────────────────────────────────────────────
+-- INSERT only allowed from a registered + assigned device (MAC-validated)
+CREATE POLICY "anon insert snapshots"
+  ON activity_snapshots FOR INSERT TO anon
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM devices
+      WHERE devices.mac_address = current_setting('request.headers', true)::json->>'x-device-mac'
+        AND devices.user_id IS NOT NULL
+    )
+  );
 
--- App categories: anon can read (for categorizing apps)
+-- ── device_sessions ────────────────────────────────────────────────────────
+CREATE POLICY "anon insert device_sessions"
+  ON device_sessions FOR INSERT TO anon
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM devices
+      WHERE devices.mac_address = current_setting('request.headers', true)::json->>'x-device-mac'
+        AND devices.user_id IS NOT NULL
+    )
+  );
+-- UPDATE allowed to record session end
+CREATE POLICY "anon update device_sessions"
+  ON device_sessions FOR UPDATE TO anon USING (true);
+
+-- ── productivity_summaries ─────────────────────────────────────────────────
+CREATE POLICY "anon insert summaries"
+  ON productivity_summaries FOR INSERT TO anon
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM devices
+      WHERE devices.mac_address = current_setting('request.headers', true)::json->>'x-device-mac'
+        AND devices.user_id IS NOT NULL
+    )
+  );
+CREATE POLICY "anon update summaries"
+  ON productivity_summaries FOR UPDATE TO anon USING (true);
+
+-- ── app_categories ─────────────────────────────────────────────────────────
+-- Read-only reference data for the tracker's categorizer
 CREATE POLICY "Anon can read categories"
   ON app_categories FOR SELECT USING (true);
 
--- devices: authenticated admins (web portal) can read all devices
-CREATE POLICY "Authenticated users read all devices"
-  ON devices FOR SELECT TO authenticated
-  USING (true);
+-- ── realtime.messages ──────────────────────────────────────────────────────
+-- Users can only subscribe to their own attendance channel
+ALTER TABLE realtime.messages ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users subscribe to own channels"
+  ON realtime.messages FOR SELECT TO authenticated
+  USING (realtime.topic() = 'attendance:' || auth.uid()::text);
 
 -- ============================================================
 -- SEED: DEFAULT APP CATEGORIES (35 apps)
