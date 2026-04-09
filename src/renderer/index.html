@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AllStars Tracker</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0A1628;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #1a1a2e;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.32);
+      width: 360px;
+      padding: 36px 32px;
+    }
+
+    .logo {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .logo-star { font-size: 28px; }
+    .logo-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #0A1628;
+      letter-spacing: -0.5px;
+    }
+    .logo-sub {
+      font-size: 12px;
+      color: #6b7280;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    h2 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: #0A1628;
+    }
+    .subtitle {
+      font-size: 13px;
+      color: #6b7280;
+      margin-bottom: 24px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: #374151;
+      margin-bottom: 6px;
+    }
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1.5px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #111827;
+      margin-bottom: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input:focus { border-color: #F5A623; }
+
+    .btn-primary {
+      width: 100%;
+      padding: 11px;
+      background: #F5A623;
+      color: #1a1a2e;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .btn-primary:hover { opacity: 0.88; }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-outline {
+      width: 100%;
+      padding: 10px;
+      background: transparent;
+      color: #0A1628;
+      font-size: 13px;
+      font-weight: 500;
+      border: 1.5px solid #0A1628;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: background 0.15s;
+    }
+    .btn-outline:hover { background: #f3f4f6; }
+
+    .error-msg {
+      display: none;
+      background: #fef2f2;
+      border: 1px solid #fca5a5;
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 13px;
+      color: #dc2626;
+      margin-bottom: 14px;
+    }
+
+    /* Settings view */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #ecfdf5;
+      color: #065f46;
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 20px;
+    }
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+    }
+
+    .user-email {
+      font-size: 13px;
+      color: #6b7280;
+      margin-bottom: 20px;
+      word-break: break-all;
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid #f3f4f6;
+    }
+    .toggle-row:last-of-type { border-bottom: none; }
+    .toggle-label { font-size: 14px; color: #374151; }
+    .toggle-desc { font-size: 12px; color: #9ca3af; margin-top: 2px; }
+
+    .toggle-switch {
+      position: relative;
+      width: 40px;
+      height: 22px;
+      flex-shrink: 0;
+    }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute; inset: 0;
+      background: #d1d5db;
+      border-radius: 22px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .slider::before {
+      content: '';
+      position: absolute;
+      width: 16px; height: 16px;
+      left: 3px; bottom: 3px;
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.2s;
+    }
+    input:checked + .slider { background: #F5A623; }
+    input:checked + .slider::before { transform: translateX(18px); }
+
+    .footer-text {
+      font-size: 12px;
+      color: #9ca3af;
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <!-- ───── LOGIN VIEW ───── -->
+  <div class="card" id="login-view">
+    <div class="logo">
+      <div class="logo-star">&#x2B50;</div>
+      <div class="logo-title">AllStars</div>
+      <div class="logo-sub">Desktop Tracker</div>
+    </div>
+
+    <h2>Sign In</h2>
+    <p class="subtitle">Use your AllStars HR credentials</p>
+
+    <div class="error-msg" id="error-msg"></div>
+
+    <label for="email">Work Email</label>
+    <input type="email" id="email" placeholder="you@company.com" autocomplete="username" />
+
+    <label for="password">Password</label>
+    <input type="password" id="password" placeholder="••••••••" autocomplete="current-password" />
+
+    <button class="btn-primary" id="sign-in-btn">Sign In &amp; Start Tracking</button>
+  </div>
+
+  <!-- ───── SETTINGS VIEW ───── -->
+  <div class="card hidden" id="settings-view">
+    <div class="logo">
+      <div class="logo-star">&#x2B50;</div>
+      <div class="logo-title">AllStars</div>
+      <div class="logo-sub">Desktop Tracker</div>
+    </div>
+
+    <div class="status-badge">
+      <span class="status-dot"></span>
+      <span>Tracking Active</span>
+    </div>
+
+    <p class="user-email" id="user-email"></p>
+
+    <div class="toggle-row">
+      <div>
+        <div class="toggle-label">Auto Clock-In/Out</div>
+        <div class="toggle-desc">Automatically log attendance</div>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="toggle-auto-clock" />
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="toggle-row">
+      <div>
+        <div class="toggle-label">Screenshots</div>
+        <div class="toggle-desc">Occasional random captures (~1/10 min)</div>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="toggle-screenshots" />
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="toggle-row">
+      <div>
+        <div class="toggle-label">Start on Boot</div>
+        <div class="toggle-desc">Launch automatically at login</div>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="toggle-auto-launch" />
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <button class="btn-outline" id="portal-btn">Open AllStars HR Portal</button>
+    <button class="btn-outline" id="sign-out-btn" style="margin-top:8px;border-color:#dc2626;color:#dc2626;">Sign Out</button>
+
+    <p class="footer-text">AllStars Tracker runs in the system tray.</p>
+  </div>
+
+  <script>
+    // nodeIntegration is enabled — we can require electron directly
+    const { ipcRenderer } = require('electron');
+
+    const loginView    = document.getElementById('login-view');
+    const settingsView = document.getElementById('settings-view');
+    const errorMsg     = document.getElementById('error-msg');
+    const emailInput   = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const signInBtn    = document.getElementById('sign-in-btn');
+    const userEmailEl  = document.getElementById('user-email');
+    const toggleAutoClock  = document.getElementById('toggle-auto-clock');
+    const toggleScreenshots = document.getElementById('toggle-screenshots');
+    const toggleAutoLaunch = document.getElementById('toggle-auto-launch');
+    const portalBtn    = document.getElementById('portal-btn');
+    const signOutBtn   = document.getElementById('sign-out-btn');
+
+    function showError(msg) {
+      errorMsg.textContent = msg;
+      errorMsg.style.display = 'block';
+    }
+
+    function showSettings(state) {
+      loginView.classList.add('hidden');
+      settingsView.classList.remove('hidden');
+      if (state.email) userEmailEl.textContent = state.email;
+      toggleAutoClock.checked = !!state.autoClockEnabled;
+      toggleScreenshots.checked = !!state.screenshotsEnabled;
+      toggleAutoLaunch.checked = !!state.autoLaunchEnabled;
+    }
+
+    function showLogin() {
+      settingsView.classList.add('hidden');
+      loginView.classList.remove('hidden');
+      errorMsg.style.display = 'none';
+    }
+
+    // Load current state on open
+    ipcRenderer.invoke('get-state').then((state) => {
+      if (state.email) {
+        showSettings(state);
+      }
+    });
+
+    // Sign in
+    signInBtn.addEventListener('click', async () => {
+      const email = emailInput.value.trim();
+      const pass  = passwordInput.value;
+      if (!email || !pass) { showError('Please enter your email and password.'); return; }
+      signInBtn.disabled = true;
+      signInBtn.textContent = 'Signing in...';
+      errorMsg.style.display = 'none';
+      try {
+        const result = await ipcRenderer.invoke('sign-in', { email, password: pass });
+        const state  = await ipcRenderer.invoke('get-state');
+        showSettings(state);
+      } catch (err) {
+        showError(err && err.message ? err.message : 'Sign-in failed. Check your credentials.');
+      } finally {
+        signInBtn.disabled = false;
+        signInBtn.textContent = 'Sign In & Start Tracking';
+      }
+    });
+
+    // Allow Enter key to submit
+    passwordInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') signInBtn.click();
+    });
+
+    // Toggle handlers
+    toggleAutoClock.addEventListener('change', () => {
+      ipcRenderer.invoke('toggle-auto-clock', toggleAutoClock.checked);
+    });
+    toggleScreenshots.addEventListener('change', () => {
+      ipcRenderer.invoke('toggle-screenshots', toggleScreenshots.checked);
+    });
+    toggleAutoLaunch.addEventListener('change', () => {
+      ipcRenderer.invoke('toggle-auto-launch', toggleAutoLaunch.checked);
+    });
+
+    portalBtn.addEventListener('click', () => {
+      ipcRenderer.invoke('open-portal');
+    });
+
+    signOutBtn.addEventListener('click', async () => {
+      await ipcRenderer.invoke('sign-out');
+      showLogin();
+    });
+  </script>
+</body>
+</html>

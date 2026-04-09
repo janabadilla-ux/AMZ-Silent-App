@@ -1,0 +1,56 @@
+appId: com.hireallstars.tracker
+productName: AllStars Tracker
+copyright: Copyright © 2025 HireAllStars
+
+directories:
+  output: release
+  buildResources: assets
+
+files:
+  - dist/**/*
+  - src/renderer/**/*
+  - assets/**/*
+  - node_modules/**/*
+  - package.json
+
+asarUnpack:
+  - "**/*.node"
+  - "**/node_modules/better-sqlite3/**"
+
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  icon: assets/tray-icon.ico
+  signAndEditExecutable: false
+
+nsis:
+  oneClick: true
+  perMachine: false
+  allowToChangeInstallationDirectory: false
+  runAfterFinish: false
+  createDesktopShortcut: false
+  createStartMenuShortcut: false
+  deleteAppDataOnUninstall: false
+
+mac:
+  target:
+    - target: dmg
+      arch:
+        - x64
+        - arm64
+  icon: assets/tray-icon.icns
+  category: public.app-category.productivity
+  extendInfo:
+    NSAppleEventsUsageDescription: "AllStars Tracker needs Accessibility access to track active applications."
+
+linux:
+  target:
+    - target: AppImage
+      arch:
+        - x64
+  icon: assets/tray-icon.png
+  category: Office
+
+publish: null

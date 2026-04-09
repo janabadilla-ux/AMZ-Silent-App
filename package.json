@@ -1,0 +1,36 @@
+{
+  "name": "allstars-tracker",
+  "version": "1.0.0",
+  "description": "Silent system-tray productivity tracker for AllStars HR",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.main.json",
+    "start": "npm run build && electron .",
+    "pack:win": "npm run build && electron-builder --win",
+    "pack:mac": "npm run build && electron-builder --mac",
+    "pack:linux": "npm run build && electron-builder --linux",
+    "rebuild": "npx @electron/rebuild"
+  },
+  "keywords": [],
+  "author": "HireAllStars",
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.4",
+    "auto-launch": "^5.0.6",
+    "better-sqlite3": "^11.10.0",
+    "electron-store": "^8.2.0",
+    "screenshot-desktop": "^1.15.3",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@electron/rebuild": "^3.7.1",
+    "@types/auto-launch": "^5.0.5",
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/node": "^20.17.30",
+    "@types/uuid": "^9.0.8",
+    "electron": "^28.3.3",
+    "electron-builder": "^24.13.3",
+    "typescript": "^5.8.3"
+  }
+}
