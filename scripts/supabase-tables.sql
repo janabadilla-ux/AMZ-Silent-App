@@ -119,27 +119,24 @@ ALTER TABLE productivity_summaries ENABLE ROW LEVEL SECURITY;
 ALTER TABLE device_sessions        ENABLE ROW LEVEL SECURITY;
 ALTER TABLE app_categories         ENABLE ROW LEVEL SECURITY;
 
--- devices: anon can upsert its own row and read it back (to get assigned user_id)
+-- devices: anon can upsert + update its own row; SELECT scoped to own MAC via request header
 CREATE POLICY "Devices can upsert own record"
   ON devices FOR INSERT WITH CHECK (true);
 CREATE POLICY "Devices can update own record"
   ON devices FOR UPDATE USING (true) WITH CHECK (true);
-CREATE POLICY "Devices can read own record"
-  ON devices FOR SELECT USING (true);
+CREATE POLICY "Device reads own row"
+  ON devices FOR SELECT TO anon
+  USING (mac_address = current_setting('request.headers', true)::json->>'x-device-mac');
 
--- Tracking tables: anon can INSERT + SELECT (SELECT needed for upsert conflict checks)
+-- Tracking tables: INSERT only — SELECT is not needed and would expose all employee data
 CREATE POLICY "Tracker can insert snapshots"
   ON activity_snapshots FOR INSERT WITH CHECK (true);
-CREATE POLICY "Tracker can select snapshots"
-  ON activity_snapshots FOR SELECT USING (true);
 CREATE POLICY "Tracker can insert summaries"
   ON productivity_summaries FOR INSERT WITH CHECK (true);
 CREATE POLICY "Tracker can upsert summaries"
   ON productivity_summaries FOR UPDATE USING (true) WITH CHECK (true);
 CREATE POLICY "Tracker can insert device sessions"
   ON device_sessions FOR INSERT WITH CHECK (true);
-CREATE POLICY "Tracker can select device sessions"
-  ON device_sessions FOR SELECT USING (true);
 CREATE POLICY "Tracker can update device sessions"
   ON device_sessions FOR UPDATE USING (true) WITH CHECK (true);
 
